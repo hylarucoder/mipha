@@ -3,6 +3,8 @@ name = "mipha"
 version = "0.1.0"
 authors = ["twocucao <twocucao@gmail.com>"]
 edition = "2018"
+description = "A Python wrapper for the Rust API for purposes of testing"
+
 
 [lib]
 name = "mipha"
@@ -14,4 +16,3 @@ features = ["extension-module"]
 
 [dependencies]
 qrcode = "0.11"
-image = "0.23.4"

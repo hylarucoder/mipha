@@ -4,6 +4,7 @@ Yet Another Waifu For Paint for Python
 
 
 ```
-rustup clean && rustup update
+rustup update
 rustup toolchain install nightly
+rustup default nightly
 ```
