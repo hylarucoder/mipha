@@ -1,6 +1,6 @@
 # mipha
 
-Yet Another Waifu For Paint for Python
+Yet Another Toolbox for Pythonista
 
 ```
 rustup update

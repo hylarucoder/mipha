@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from mipha.objstore import ObjStore
+from mipha.native.objstore import ObjStore
 
 PYPY = platform.python_implementation() == "PyPy"
 

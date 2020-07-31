@@ -4,7 +4,7 @@ import platform
 
 import psutil
 import pytest
-from mipha.buf_and_str import BytesExtractor
+from mipha.native.buf_and_str import BytesExtractor
 
 PYPY = platform.python_implementation() == "PyPy"
 

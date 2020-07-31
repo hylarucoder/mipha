@@ -1,5 +1,5 @@
 import pytest
-from mipha.test_dict import DictSize
+from mipha.native.test_dict import DictSize
 
 
 @pytest.mark.parametrize("size", [64, 128, 256])
