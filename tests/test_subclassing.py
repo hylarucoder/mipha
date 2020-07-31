@@ -1,6 +1,6 @@
 import platform
 
-from mipha.subclassing import Subclassable
+from mipha.native.subclassing import Subclassable
 
 PYPY = platform.python_implementation() == "PyPy"
 

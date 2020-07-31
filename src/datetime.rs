@@ -189,7 +189,7 @@ fn issue_219() -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(extends=PyTzInfo)]
+#[pyclass(extends = PyTzInfo)]
 pub struct TzClass {}
 
 #[pymethods]

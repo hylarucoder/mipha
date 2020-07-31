@@ -4,7 +4,7 @@ import struct
 import sys
 
 import pytest
-import mipha.datetime as rdt
+from mipha.native import datetime as rdt
 from hypothesis import given, example
 from hypothesis import strategies as st
 
