@@ -22,12 +22,10 @@ class PyTest(TestCommand):
 
 class CargoModifiedSdist(SdistCommand):
     """Modifies Cargo.toml to use an absolute rather than a relative path
-
     The current implementation of PEP 517 in pip always does builds in an
     isolated temporary directory. This causes problems with the build, because
     Cargo.toml necessarily refers to the current version of pyo3 by a relative
     path.
-
     Since these sdists are never meant to be used for anything other than
     tox / pip installs, at sdist build time, we will modify the Cargo.toml
     in the sdist archive to include an *absolute* path to pyo3.
@@ -93,12 +91,8 @@ setup(
     ],
     packages=["mipha"],
     rust_extensions=[
-        make_rust_extension("mipha.buf_and_str"),
-        make_rust_extension("mipha.datetime"),
-        make_rust_extension("mipha.objstore"),
-        make_rust_extension("mipha.othermod"),
-        make_rust_extension("mipha.subclassing"),
-        make_rust_extension("mipha.test_dict"),
+        make_rust_extension("mipha.profiler.speedscope"),
+        # make_rust_extension("rustapi_module.pyclass_iter"),
     ],
     install_requires=install_requires,
     tests_require=tests_require,
