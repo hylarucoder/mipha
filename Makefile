@@ -28,7 +28,8 @@ build-prod: ## build rust and python mixed
 	maturin build --release
 
 test: ## test
-	pytest
+	pip install -e .
+	pytest -vvv
 
 publish: ## publish package to pypi
 	poetry version
