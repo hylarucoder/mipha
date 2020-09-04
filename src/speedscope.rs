@@ -1,19 +1,11 @@
-use log::info;
-use pyo3::callback::IntoPyCallbackOutput;
-use pyo3::create_exception;
-use pyo3::exceptions::Exception;
+use pyo3::exceptions::{OSError, RuntimeError};
 use pyo3::prelude::*;
 use pyo3::{PyErr, PyResult};
 use serde::{Deserialize, Serialize};
-use serde_json::{to_string, Result};
+use serde_json::to_string;
 use std::collections::HashMap;
-use std::error::Error;
 use std::fmt;
-
-#[derive(Debug)]
-struct CustomError {
-    message: String,
-}
+use std::result::Result;
 
 struct Record {
     timestamp: u64,
@@ -23,6 +15,24 @@ struct Record {
     name: String,
 }
 
+#[derive(Serialize, Deserialize)]
+struct Event {
+    r#type: String,
+    at: u64,
+    frame: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Profile {
+    r#type: String,
+    name: String,
+    unit: String,
+    start_value: String,
+    end_value: String,
+    events: Vec<Event>,
+}
+
+#[derive(Serialize, Deserialize)]
 struct Frame {
     name: String,
     file: String,
@@ -31,15 +41,27 @@ struct Frame {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Event {
-    r#type: String,
-    at: u64,
-    frame: u64,
+struct ShareFrames {
+    frames: Vec<Frame>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SpeedScopeStruct {
+    schema: String,
+    profiles: Vec<Profile>,
+    shared: ShareFrames,
+    active_profile_index: u8,
+    exporter: String,
+    name: String,
 }
 
 #[pyclass]
 struct SpRecorder {
     records: Vec<Record>,
+}
+
+pub fn make_error<E: fmt::Display + Sized>(e: E) -> PyErr {
+    PyErr::new::<RuntimeError, _>(format!("{}", e))
 }
 
 #[pymethods]
@@ -75,7 +97,7 @@ impl SpRecorder {
     fn len(&mut self) -> PyResult<usize> {
         Ok(self.records.len())
     }
-    fn _make_speed_scope_dict(&mut self) -> Result<String> {
+    fn _make_speed_scope_dict(&mut self) -> Result<String, PyErr> {
         let mut events: Vec<Event> = Vec::new();
         let mut frames: Vec<Frame> = Vec::new();
         let mut frame_cache: HashMap<String, u64> = Default::default();
@@ -110,15 +132,27 @@ impl SpRecorder {
                 None => {}
             }
         }
-        // let result = to_string(&events)?;
-        let result = "".to_string();
+        let speed_scope_struct = SpeedScopeStruct {
+            schema: "https://www.speedscope.app/file-format-schema.json".to_string(),
+            profiles: vec![Profile {
+                r#type: "evented".to_string(),
+                name: "python".to_string(),
+                unit: "nanoseconds".to_string(),
+                start_value: "".to_string(),
+                end_value: "".to_string(),
+                events: events,
+            }],
+            shared: ShareFrames { frames },
+            active_profile_index: 0,
+            exporter: "pyspeedscope".to_string(),
+            name: "profile for python script".to_string(),
+        };
+        let result = to_string(&speed_scope_struct).map_err(make_error)?;
         Ok(result)
     }
+
     fn export_to_json(&mut self, filename: &str) -> PyResult<String> {
-        let result = match self._make_speed_scope_dict() {
-            Ok(result) => result,
-            Err(err) => "".to_string(),
-        };
+        let result = self._make_speed_scope_dict()?;
         Ok(result)
     }
 }
