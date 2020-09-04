@@ -1,4 +1,5 @@
 use log::info;
+use pyo3::callback::IntoPyCallbackOutput;
 use pyo3::create_exception;
 use pyo3::exceptions::Exception;
 use pyo3::prelude::*;
@@ -9,23 +10,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 
-// impl fmt::Display for serde_json::Error {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "Oh no!")
-//     }
-// }
 #[derive(Debug)]
-enum CustomError {
-    JSON(serde_json::Error),
+struct CustomError {
+    message: String,
 }
-
-impl From<serde_json::Error> for CustomError {
-    fn from(error: serde_json::Error) -> Self {
-        CustomError::JSON(error)
-    }
-}
-
-// create_exception!(mymodule, CustomError, Exception);
 
 struct Record {
     timestamp: u64,
@@ -122,16 +110,15 @@ impl SpRecorder {
                 None => {}
             }
         }
-        let result = to_string(&events)?;
+        // let result = to_string(&events)?;
+        let result = "".to_string();
         Ok(result)
     }
     fn export_to_json(&mut self, filename: &str) -> PyResult<String> {
-        let result = self._make_speed_scope_dict();
-
-        // let result = match result {
-        //     Ok(file) => file,
-        //     Err(error) => error.to_string(),
-        // };
+        let result = match self._make_speed_scope_dict() {
+            Ok(result) => result,
+            Err(err) => "".to_string(),
+        };
         Ok(result)
     }
 }
@@ -139,7 +126,6 @@ impl SpRecorder {
 #[pymodule]
 fn speedscope(_py: Python, m: &PyModule) -> PyResult<()> {
     pyo3_log::init();
-    m.add("CustomError", py.get_type::<CustomError>())?;
     m.add_class::<SpRecorder>()?;
     Ok(())
 }
