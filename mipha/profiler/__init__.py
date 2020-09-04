@@ -20,6 +20,9 @@ class Recorder:
         sys.setprofile(None)
         self._end_time = self.get_nanos()
 
+    def export_to_json(self, filename):
+        self.sp_recorder.export_to_json(filename)
+
     def _trace_func(self, frame, event, arg):
         filename = frame.f_code.co_filename
         if filename == __file__:
@@ -50,5 +53,8 @@ def track(filename):
     sys.setprofile(record._trace_func)
     yield
     record.stop()
+    t = record.export_to_json(filename)
+    print("record export to json", t)
+    assert False
 
 # __all__ = ["profiler_start", "profiler_stop", "profiler_export"]

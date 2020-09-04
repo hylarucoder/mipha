@@ -1,8 +1,19 @@
-use log::{debug, info, trace};
+use log::info;
+use pyo3::callback::IntoPyCallbackOutput;
+use pyo3::create_exception;
+use pyo3::exceptions::Exception;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple};
-use pyo3_log::{Caching, Logger};
+use pyo3::{PyErr, PyResult};
+use serde::{Deserialize, Serialize};
+use serde_json::{to_string, Result};
 use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
+
+#[derive(Debug)]
+struct CustomError {
+    message: String,
+}
 
 struct Record {
     timestamp: u64,
@@ -19,6 +30,7 @@ struct Frame {
     col: u8,
 }
 
+#[derive(Serialize, Deserialize)]
 struct Event {
     r#type: String,
     at: u64,
@@ -36,15 +48,12 @@ impl SpRecorder {
     fn new() -> Self {
         SpRecorder { records: vec![] }
     }
-
     fn start(&mut self) -> PyResult<()> {
         Ok(())
     }
-
     fn stop(&mut self) -> PyResult<()> {
         Ok(())
     }
-
     fn append_record(
         &mut self,
         timestamp: u64,
@@ -63,41 +72,33 @@ impl SpRecorder {
         self.records.push(record);
         Ok(())
     }
-
     fn len(&mut self) -> PyResult<usize> {
         Ok(self.records.len())
     }
-
-    fn _make_speed_scope_dict(&mut self) {
+    fn _make_speed_scope_dict(&mut self) -> Result<String> {
         let mut events: Vec<Event> = Vec::new();
         let mut frames: Vec<Frame> = Vec::new();
-        let mut frame_cache: HashMap<&str, u64> = Default::default();
-        // while self.records[0][1] == "C" {
-        //     self.records.pop(0)
-        // }
-        //
-        // while self.records[-1][1] == "O" {
-        //     self.records.pop(-1)
-        // }
+        let mut frame_cache: HashMap<String, u64> = Default::default();
         for record in &self.records {
-            let filename = record.filename.clone();
-            let line = record.line.clone();
-            let name = record.name.clone();
             let timestamp = record.timestamp.clone();
             let r#type = record.typ.clone();
-            let key_items = [filename, line.to_string(), name];
+            let key_items = [
+                record.filename.clone(),
+                record.line.to_string(),
+                record.name.clone(),
+            ];
             let key = String::from(key_items.join("-"));
-            if !frame_cache.contains_key::<str>(&key) {
-                frame_cache.insert(&key, frames.len() as u64);
+            if !frame_cache.contains_key::<String>(&key) {
+                frame_cache.insert(key.clone(), frames.len() as u64);
                 let frame = Frame {
-                    name,
-                    file: filename,
-                    line,
+                    name: record.name.clone(),
+                    file: record.filename.clone(),
+                    line: record.line,
                     col: 1,
                 };
                 frames.push(frame);
             }
-            match frame_cache.get::<str>(&key) {
+            match frame_cache.get(&key) {
                 Some(frame_cache_count) => {
                     let event = Event {
                         r#type,
@@ -109,10 +110,16 @@ impl SpRecorder {
                 None => {}
             }
         }
+        // let result = to_string(&events)?;
+        let result = "".to_string();
+        Ok(result)
     }
-
     fn export_to_json(&mut self, filename: &str) -> PyResult<String> {
-        Ok(format!("--"))
+        let result = match self._make_speed_scope_dict() {
+            Ok(result) => result,
+            Err(err) => "".to_string(),
+        };
+        Ok(result)
     }
 }
 
@@ -120,6 +127,5 @@ impl SpRecorder {
 fn speedscope(_py: Python, m: &PyModule) -> PyResult<()> {
     pyo3_log::init();
     m.add_class::<SpRecorder>()?;
-
     Ok(())
 }
