@@ -29,8 +29,11 @@ build-prod: ## build rust and python mixed
 
 test: ## test
 	pip install -e .
-	pytest -vvv
+	sudo pytest -vvv
 
 publish: ## publish package to pypi
 	poetry version
 	poetry publish --build
+
+rust-test: ## rust test
+	sudo cargo test --color=always --package mipha --lib spy::tests::test_tracer --no-fail-fast -- --exact -Z unstable-options --format=json --show-output --nocapture

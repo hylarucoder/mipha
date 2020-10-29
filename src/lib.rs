@@ -1,1 +1,1 @@
-pub mod speedscope;
+pub mod spy;
