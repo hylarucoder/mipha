@@ -11,7 +11,7 @@ name = "mipha"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.11.1"
+version = "0.12.3"
 features = ["extension-module"]
 
 [dependencies]
@@ -21,3 +21,11 @@ serde_derive = "1.0"
 serde_json = "1.0"
 log = "~0.4"
 pyo3-log = "0.1.2"
+py-spy = "0.3.3"
+env_logger = "0.7"
+failure = "0.1.8"
+remoteprocess = {version="0.3.4", features=["unwind"]}
+
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]

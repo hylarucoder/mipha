@@ -6,3 +6,4 @@ venv/
 /target
 **/*.rs.bk
 *.pyc
+spy.cpython-38-darwin.so

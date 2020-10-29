@@ -91,7 +91,7 @@ setup(
     ],
     packages=["mipha"],
     rust_extensions=[
-        make_rust_extension("mipha.profiler.speedscope"),
+        make_rust_extension("mipha.spy"),
         # make_rust_extension("rustapi_module.pyclass_iter"),
     ],
     install_requires=install_requires,
