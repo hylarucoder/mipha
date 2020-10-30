@@ -5,22 +5,17 @@ authors = ["twocucao <twocucao@gmail.com>"]
 edition = "2018"
 description = "A Python wrapper for the Rust API for purposes of testing"
 
-
-[lib]
-name = "mipha"
-crate-type = ["cdylib"]
-
-[dependencies.pyo3]
-version = "0.9.2"
-features = ["extension-module"]
-
 [dependencies]
-digest = "0.9.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0"
+serde_json = "1.0"
+py-spy = "0.3.3"
+failure = "0.1.8"
+remoteprocess = {version="0.3.4", features=["unwind"]}
+actix-web = "3"
+diesel = { version = "1.4.4", features = ["postgres"] }
+dotenv = "0.15.0"
+env_logger = "0.8.1"
 
-
-[package.metadata.maturin.scripts]
-get_42 = "mipha:get_42"
-
-[package.metadata.maturin]
-requires-dist = ["flask~=1.1.0", "toml==0.10.0"]
-classifier = ["Programming Language :: Python"]
+[dev-dependencies]
+actix-rt = "1"

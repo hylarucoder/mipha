@@ -15,21 +15,8 @@ export PRINT_HELP_PYSCRIPT
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-dev: ## build local
-	maturin develop
+test: ## rust test
+	cargo test --color=always --package mipha --lib spy::tests::test_tracer --no-fail-fast -- --exact -Z unstable-options --format=json --show-output --nocapture
 
-build-local: ## build local
-	maturin build && pip install -e .
-
-build: ## build rust and python mixed
-	maturin build
-
-build-prod: ## build rust and python mixed
-	maturin build --release
-
-test: ## test
-	pytest
-
-publish: ## publish package to pypi
-	poetry version
-	poetry publish --build
+start: ## start
+	systemfd --no-pid -s http::13333 -- cargo watch -x run
