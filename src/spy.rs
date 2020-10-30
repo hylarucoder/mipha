@@ -159,7 +159,6 @@ impl Tracer {
 
 #[pymodule]
 fn spy(_py: Python, m: &PyModule) -> PyResult<()> {
-    pyo3_log::init();
     m.add_class::<Tracer>()?;
     Ok(())
 }
