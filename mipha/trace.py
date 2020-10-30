@@ -1,10 +1,11 @@
-from .spy import Tracer  # noqa
+from mipha.spy import Tracer  # noqa
 
 
 def track():
     record = Tracer()
-    record.trace(
-        pid=3138,
+    r = record.trace(
+        pid=88708,
         sample_rate=1,
         trace_line="toolbar/apps/admin.py",
     )
+    print(r)
