@@ -1,9 +1,5 @@
-use pyo3::exceptions::PyRuntimeError;
-use pyo3::prelude::*;
-use pyo3::{PyErr, PyResult};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
-use std::fmt;
 
 #[derive(Serialize, Deserialize)]
 struct Arg {
@@ -45,40 +41,27 @@ struct StackTraces {
     traces: Vec<Trace>,
 }
 
-#[pyclass]
 struct Tracer {}
 
-pub fn make_error<E: fmt::Display + Sized>(e: E) -> PyErr {
-    PyErr::new::<PyRuntimeError, _>(format!("{}", e))
-}
-
-#[pymethods]
 impl Tracer {
-    #[new]
     fn new() -> Self {
         Tracer {}
     }
-    fn start(&mut self) -> PyResult<()> {
-        Ok(())
-    }
-    fn stop(&mut self) -> PyResult<()> {
-        Ok(())
-    }
-    fn trace(&mut self, pid: i32, sample_rate: u64, trace_line: &str) -> PyResult<String> {
+    fn trace(&mut self, pid: i32, sample_rate: u64, trace_line: &str) -> String {
         // Create a new PythonSpy object with the default config options
         let mut config = py_spy::Config::default();
         config.dump_locals = true;
-        let mut py_process = py_spy::PythonSpy::new(pid, &config).map_err(make_error)?;
+        let mut py_process = py_spy::PythonSpy::new(pid, &config).unwrap();
         let mut stacktrace = StackTraces {
             pid: py_process.pid,
             version: py_process.version.to_string(),
-            cmdline: py_process.process.cmdline().map_err(make_error)?.join(""),
-            exe: py_process.process.exe().map_err(make_error)?,
+            cmdline: py_process.process.cmdline().unwrap().join(""),
+            exe: py_process.process.exe().unwrap(),
             start_at: None,
             end_at: None,
             traces: vec![],
         };
-        let py_traces = py_process.get_stack_traces().map_err(make_error)?;
+        let py_traces = py_process.get_stack_traces().unwrap();
 
         for py_trace in py_traces {
             let thread_id = py_trace.format_threadid();
@@ -88,15 +71,15 @@ impl Tracer {
                     trace = Trace {
                         thread_id,
                         name: name.to_string(),
-                        status: py_trace.status_str().parse()?,
+                        status: py_trace.status_str().to_string(),
                         frames: vec![],
                     };
                 }
                 None => {
                     trace = Trace {
                         thread_id,
-                        name: "Known".parse()?,
-                        status: py_trace.status_str().parse()?,
+                        name: "Known".to_string(),
+                        status: py_trace.status_str().to_string(),
                         frames: vec![],
                     };
                 }
@@ -137,13 +120,13 @@ impl Tracer {
                         if shown_args {
                             py_args.push(Arg {
                                 name: local.name.to_string(),
-                                repr: repr.parse()?,
+                                repr: repr.to_string(),
                             })
                         }
                         if shown_locals {
                             py_locals.push(Local {
                                 name: local.name.to_string(),
-                                repr: repr.parse()?,
+                                repr: repr.to_string(),
                             })
                         }
                     }
@@ -152,15 +135,9 @@ impl Tracer {
 
             trace.frames.extend(frames);
         }
-        let result = to_string(&stacktrace).map_err(make_error)?;
-        Ok(result)
+        let result = to_string(&stacktrace).unwrap();
+        return result;
     }
-}
-
-#[pymodule]
-fn spy(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Tracer>()?;
-    Ok(())
 }
 
 #[cfg(test)]
