@@ -22,6 +22,7 @@ rocket_cors = { version = "0.5.1", default-features = false }
 chrono = { version = "0.4.10", features = ["serde"] }
 validator = "0.10.0"
 validator_derive = "0.10.0"
+sysinfo = "0.15.3"
 
 
 

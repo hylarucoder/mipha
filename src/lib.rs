@@ -2,6 +2,8 @@
 
 mod config;
 
+extern crate sysinfo;
+
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -21,6 +23,7 @@ use rocket_contrib::json::JsonValue;
 use rocket_cors::Cors;
 
 mod routes;
+mod spy;
 
 #[catch(404)]
 fn not_found() -> JsonValue {
