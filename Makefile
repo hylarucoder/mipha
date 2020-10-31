@@ -19,4 +19,4 @@ test: ## rust test
 	cargo test --color=always --package mipha --lib spy::tests::test_tracer --no-fail-fast -- --exact -Z unstable-options --format=json --show-output --nocapture
 
 start: ## start
-	cargo watch -x run
+	RUST_BACKTRACE=1 cargo watch -x run
