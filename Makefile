@@ -19,4 +19,4 @@ test: ## rust test
 	cargo test --color=always --package mipha --lib spy::tests::test_tracer --no-fail-fast -- --exact -Z unstable-options --format=json --show-output --nocapture
 
 start: ## start
-	systemfd --no-pid -s http::13333 -- cargo watch -x run
+	cargo watch -x run
