@@ -48,69 +48,73 @@ impl Tracer {
         // Create a new PythonSpy object with the default config options
         let mut config = py_spy::Config::default();
         config.dump_locals = true;
-        let mut py_process = py_spy::PythonSpy::new(pid, &config).unwrap();
-        let mut stacktrace = PyProcess {
-            pid: py_process.pid,
-            version: py_process.version.to_string(),
-            cmdline: py_process.process.cmdline().unwrap().join(""),
-            exe: py_process.process.exe().unwrap(),
+        let mut process = py_spy::PythonSpy::new(pid, &config).unwrap();
+        let mut py_process = PyProcess {
+            pid: process.pid,
+            version: process.version.to_string(),
+            cmdline: process.process.cmdline().unwrap().join(""),
+            exe: process.process.exe().unwrap(),
             traces: vec![],
         };
-        let py_traces = py_process.get_stack_traces().unwrap();
+        let traces = process.get_stack_traces().unwrap();
 
-        for py_trace in py_traces {
-            let thread_id = py_trace.format_threadid();
-            let mut trace;
-            match py_trace.os_thread_id.as_ref() {
+        for trace in traces {
+            let thread_id = trace.format_threadid();
+            let mut py_trace;
+            match trace.os_thread_id.as_ref() {
                 Some(name) => {
-                    trace = PyTrace {
+                    py_trace = PyTrace {
                         thread_id,
                         name: name.to_string(),
-                        status: py_trace.status_str().to_string(),
+                        status: trace.status_str().to_string(),
                         frames: vec![],
                     };
                 }
                 None => {
-                    trace = PyTrace {
+                    py_trace = PyTrace {
                         thread_id,
                         name: "Known".to_string(),
-                        status: py_trace.status_str().to_string(),
+                        status: trace.status_str().to_string(),
                         frames: vec![],
                     };
                 }
             };
 
-            let mut frames: Vec<PyFrame> = vec![];
+            let mut py_frames: Vec<PyFrame> = vec![];
 
-            for py_frame in &py_trace.frames {
-                let filename = match &py_frame.short_filename {
+            for frame in &trace.frames {
+                let filename = match &frame.short_filename {
                     Some(f) => &f,
-                    None => &py_frame.filename,
+                    None => &frame.filename,
                 };
-                if py_frame.line != 0 {
-                    if filename.ends_with(trace_line) {
-                        frames.push(PyFrame {
-                            filename: filename.to_string(),
-                            name: filename.to_string(),
-                            line: py_frame.line,
-                            args: vec![],
-                            locals: vec![],
-                        });
-                    } else {
-                        frames.push(PyFrame {
-                            filename: filename.to_string(),
-                            name: filename.to_string(),
-                            line: py_frame.line,
-                            args: vec![],
-                            locals: vec![],
-                        });
-                    }
+                let mut py_frame;
+                // 不处理 native extension
+                if frame.line == 0 {
+                    continue;
+                }
+                // 匹配规则
+                if filename.ends_with(trace_line) {
+                    py_frame = PyFrame {
+                        filename: filename.to_string(),
+                        name: filename.to_string(),
+                        line: frame.line,
+                        args: vec![],
+                        locals: vec![],
+                    };
+                } else {
+                    py_frame = PyFrame {
+                        filename: filename.to_string(),
+                        name: filename.to_string(),
+                        line: frame.line,
+                        args: vec![],
+                        locals: vec![],
+                    };
                 }
 
                 let mut py_args: Vec<PyArg> = vec![];
                 let mut py_locals: Vec<PyLocal> = vec![];
 
-                if let Some(locals) = &py_frame.locals {
+                if let Some(locals) = &frame.locals {
                     let mut shown_args = false;
                     let mut shown_locals = false;
                     for local in locals {
@@ -130,15 +134,18 @@ impl Tracer {
                             py_locals.push(PyLocal {
                                 name: local.name.to_string(),
                                 repr: repr.to_string(),
-                            })
+                            });
                         }
                     }
+                    py_frame.locals.extend(py_locals);
+                    py_frame.args.extend(py_args);
+                    py_trace.frames.push(py_frame);
                 }
             }
 
-            trace.frames.extend(frames);
+            py_process.traces.push(py_trace);
         }
-        return stacktrace;
+        return py_process;
     }
 }
 
