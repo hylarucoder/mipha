@@ -11,7 +11,7 @@ dotenv = "0.15.0"
 env_logger = "0.8.1"
 failure = "0.1.8"
 futures = "0.3"
-py-spy = "0.3.3"
+py-spy = "0.3.8"
 remoteprocess = { version = "0.3.4", features = ["unwind"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
