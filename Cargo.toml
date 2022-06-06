@@ -16,7 +16,7 @@ remoteprocess = { version = "0.3.4", features = ["unwind"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
 serde_json = "1.0"
-rocket = "0.4.5"
+rocket = "0.4.7"
 rocket_contrib = { version = "0.4.5", features = ["json"] }
 rocket_cors = { version = "0.5.1", default-features = false }
 chrono = { version = "0.4.10", features = ["serde"] }
