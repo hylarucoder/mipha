@@ -6,7 +6,7 @@ edition = "2018"
 description = "A Python wrapper for the Rust API for purposes of testing"
 
 [dependencies]
-diesel = { version = "1.4.4", features = ["postgres", "chrono"] }
+diesel = { version = "1.4.6", features = ["postgres", "chrono"] }
 dotenv = "0.15.0"
 env_logger = "0.8.1"
 failure = "0.1.8"
